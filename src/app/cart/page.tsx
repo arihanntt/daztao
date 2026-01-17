@@ -17,7 +17,7 @@ export default function CartPage() {
 
   useEffect(() => setIsClient(true), []);
 
-  const shippingThreshold = 999;
+  const shippingThreshold = 499;
   const progress = Math.min((cartTotal / shippingThreshold) * 100, 100);
   const remaining = shippingThreshold - cartTotal;
 
