@@ -1,9 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useCart } from '@/context/CartContext';
-import { Lock, MapPin, CreditCard, Wallet, ArrowRight, ShoppingBag, Loader2, CheckCircle, Truck, Home, ShieldCheck, AlertCircle } from 'lucide-react';
+import { 
+  Lock, MapPin, CreditCard, Wallet, ArrowRight, ShoppingBag, 
+  Loader2, CheckCircle, Truck, Home, ShieldCheck, AlertCircle, Sparkles 
+} from 'lucide-react';
 import Header from '@/components/Header';
 import { motion } from 'framer-motion';
 
@@ -24,8 +27,18 @@ export default function CheckoutPage() {
 
   const [paymentMethod, setPaymentMethod] = useState<'upi' | 'cod'>('upi');
 
+  // --- BUNDLE DISCOUNT LOGIC ---
+  // Calculates total quantity of all items in the cart
+  const totalItems = useMemo(() => {
+    return cart.reduce((acc, item) => acc + item.quantity, 0);
+  }, [cart]);
+
+  const isDiscountEligible = totalItems >= 2;
+  const bundleDiscount = isDiscountEligible ? 100 : 0;
   const codFee = paymentMethod === 'cod' ? 100 : 0;
-  const finalTotal = cartTotal + codFee;
+
+  // Final Total = (Subtotal - Discount) + COD Fee
+  const finalTotal = (cartTotal - bundleDiscount) + codFee;
 
   useEffect(() => {
     setIsClient(true);
@@ -34,7 +47,6 @@ export default function CheckoutPage() {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
-    // Clear error when user types
     if (errors[e.target.name]) setErrors({ ...errors, [e.target.name]: '' });
   };
 
@@ -67,6 +79,7 @@ export default function CheckoutPage() {
                 image: item.image
             })),
             amount: finalTotal,
+            discountApplied: bundleDiscount,
             paymentMethod: paymentMethod,
         };
 
@@ -85,10 +98,8 @@ export default function CheckoutPage() {
         }
 
         // --- SUCCESS & REDIRECT ---
-        // 1. Clear Cart
         localStorage.removeItem('daztao_cart'); 
         
-        // 2. Construct URL Params for the confirmation page
         const params = new URLSearchParams({
             orderId: data.orderId,
             total: finalTotal.toString(),
@@ -97,7 +108,6 @@ export default function CheckoutPage() {
             phone: formData.phone
         });
 
-        // 3. Redirect
         router.push(`/order-confirmed?${params.toString()}`);
 
     } catch (error) {
@@ -123,11 +133,11 @@ export default function CheckoutPage() {
         
         {/* Step Indicator */}
         <div className="flex justify-center mb-12 text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-600 gap-4">
-           <span>Cart</span>
-           <span className="text-zinc-800">/</span>
-           <span className="text-white border-b border-white pb-1">Details</span>
-           <span className="text-zinc-800">/</span>
-           <span>Confirm</span>
+            <span>Cart</span>
+            <span className="text-zinc-800">/</span>
+            <span className="text-white border-b border-white pb-1">Details</span>
+            <span className="text-zinc-800">/</span>
+            <span>Confirm</span>
         </div>
 
         <div className="mb-16 text-center lg:text-left border-b border-white/5 pb-8">
@@ -218,17 +228,44 @@ export default function CheckoutPage() {
               </div>
 
               <div className="border-t border-white/5 py-6 space-y-3 text-sm font-light">
-                <div className="flex justify-between text-zinc-400"><span>Subtotal</span><span>₹{cartTotal}</span></div>
+                <div className="flex justify-between text-zinc-400">
+                  <span>Subtotal</span>
+                  <span className="font-mono">₹{cartTotal}</span>
+                </div>
+                
+                {/* --- AUTO-APPLIED DISCOUNT ROW --- */}
+                {isDiscountEligible && (
+                  <motion.div 
+                    initial={{ opacity: 0, x: -10 }} 
+                    animate={{ opacity: 1, x: 0 }}
+                    className="flex justify-between text-emerald-400 font-medium"
+                  >
+                    <span className="flex items-center gap-2"><Sparkles className="w-3 h-3"/> Bundle Discount</span>
+                    <span className="font-mono">- ₹100</span>
+                  </motion.div>
+                )}
+
                 <div className="flex justify-between text-zinc-400">
                   <span>Shipping</span>
-                  {paymentMethod === 'cod' ? <span className="text-orange-400 font-mono">+ ₹100</span> : <span className="text-emerald-400 font-mono">FREE</span>}
+                  {paymentMethod === 'cod' ? (
+                    <span className="text-orange-400 font-mono">+ ₹100</span>
+                  ) : (
+                    <span className="text-emerald-400 font-mono">FREE</span>
+                  )}
                 </div>
               </div>
 
               <div className="border-t border-white/5 pt-6 mb-8">
                 <div className="flex justify-between items-end">
                   <span className="text-zinc-500 text-xs uppercase tracking-widest font-bold">Total</span>
-                  <motion.span key={finalTotal} initial={{ scale: 1.1 }} animate={{ scale: 1 }} className="text-3xl font-serif italic text-white">₹{finalTotal}</motion.span>
+                  <motion.span 
+                    key={finalTotal} 
+                    initial={{ scale: 1.1 }} 
+                    animate={{ scale: 1 }} 
+                    className="text-3xl font-serif italic text-white"
+                  >
+                    ₹{finalTotal}
+                  </motion.span>
                 </div>
                 <p className="text-right text-[10px] text-zinc-600 mt-2">Est. Delivery: 3-5 Business Days</p>
               </div>
@@ -240,7 +277,11 @@ export default function CheckoutPage() {
                   isProcessing ? 'bg-zinc-800 text-zinc-500 cursor-wait' : 'bg-white text-black hover:scale-[1.02]'
                 }`}
               >
-                {isProcessing ? <><Loader2 className="w-4 h-4 animate-spin"/> Processing...</> : <>Confirm Order <ArrowRight className="w-4 h-4" /></>}
+                {isProcessing ? (
+                  <><Loader2 className="w-4 h-4 animate-spin"/> Processing...</>
+                ) : (
+                  <>Confirm Order <ArrowRight className="w-4 h-4" /></>
+                )}
               </button>
 
               <div className="flex items-center justify-center gap-2 text-[9px] text-zinc-500 mt-6 uppercase tracking-widest">
@@ -261,7 +302,7 @@ function InputGroup({ label, name, type = "text", placeholder, value, onChange, 
     <div>
       <label className="text-[9px] uppercase font-bold tracking-widest text-zinc-500 mb-2 block ml-1">{label}</label>
       <div className="relative">
-        {Icon && <Icon className="absolute left-0 top-2 w-4 h-4 text-zinc-600"/>}
+        {Icon && <Icon className="absolute left-0 top-2.5 w-4 h-4 text-zinc-600"/>}
         <input 
           name={name} 
           type={type} 
@@ -271,7 +312,11 @@ function InputGroup({ label, name, type = "text", placeholder, value, onChange, 
           className={`w-full bg-transparent border-b py-2 text-sm text-white placeholder-zinc-800 focus:outline-none transition-colors ${Icon ? 'pl-8' : ''} ${error ? 'border-red-500/50' : 'border-zinc-800 focus:border-white'}`} 
         />
       </div>
-      {error && <div className="text-red-500 text-[10px] mt-1 flex items-center gap-1"><AlertCircle className="w-3 h-3"/> {error}</div>}
+      {error && (
+        <div className="text-red-500 text-[10px] mt-1 flex items-center gap-1">
+          <AlertCircle className="w-3 h-3"/> {error}
+        </div>
+      )}
     </div>
   );
 }

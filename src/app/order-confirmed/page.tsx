@@ -32,7 +32,7 @@ Phone: ${phone}
 
 Please confirm this order.`;
 
-  const whatsappUrl = `https://wa.me/917889386542?text=${encodeURIComponent(message)}`;
+  const whatsappUrl = `https://wa.me/916005956542?text=${encodeURIComponent(message)}`;
 
   // Auto-Redirect Logic (Improved)
   useEffect(() => {
