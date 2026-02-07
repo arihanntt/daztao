@@ -4,11 +4,22 @@ import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useCart } from '@/context/CartContext';
 import { 
-  Lock, MapPin, CreditCard, Wallet, ArrowRight, ShoppingBag, 
-  Loader2, CheckCircle, Truck, Home, ShieldCheck, AlertCircle, Sparkles 
+  MapPin, CreditCard, Wallet, ArrowRight, 
+  Loader2, Truck, Home, ShieldCheck, AlertCircle, Sparkles, Star
 } from 'lucide-react';
 import Header from '@/components/Header';
 import { motion } from 'framer-motion';
+
+// --- RAZORPAY SCRIPT LOADER ---
+const loadRazorpayScript = () => {
+  return new Promise((resolve) => {
+    const script = document.createElement('script');
+    script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+    script.onload = () => resolve(true);
+    script.onerror = () => resolve(false);
+    document.body.appendChild(script);
+  });
+};
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -28,7 +39,6 @@ export default function CheckoutPage() {
   const [paymentMethod, setPaymentMethod] = useState<'upi' | 'cod'>('upi');
 
   // --- BUNDLE DISCOUNT LOGIC ---
-  // Calculates total quantity of all items in the cart
   const totalItems = useMemo(() => {
     return cart.reduce((acc, item) => acc + item.quantity, 0);
   }, [cart]);
@@ -36,8 +46,6 @@ export default function CheckoutPage() {
   const isDiscountEligible = totalItems >= 2;
   const bundleDiscount = isDiscountEligible ? 100 : 0;
   const codFee = paymentMethod === 'cod' ? 100 : 0;
-
-  // Final Total = (Subtotal - Discount) + COD Fee
   const finalTotal = (cartTotal - bundleDiscount) + codFee;
 
   useEffect(() => {
@@ -62,58 +70,166 @@ export default function CheckoutPage() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handlePlaceOrder = async () => {
-    if (!validateForm()) return;
+  // --- HELPER: SAVE TO DB ---
+  const saveOrderToBackend = async (method: string, paymentStatus: string, paymentDetails: any = {}) => {
+    const orderPayload = {
+        customer: formData,
+        items: cart.map(item => ({
+            productId: item._id,
+            title: item.title,
+            quantity: item.quantity,
+            price: item.price,
+            image: item.image,
+            links: item.links || []
+        })),
+        amount: finalTotal,
+        discountApplied: bundleDiscount,
+        paymentMethod: method,
+        paymentStatus: paymentStatus,
+        paymentDetails: paymentDetails 
+    };
 
-    setIsProcessing(true);
+    const res = await fetch('/api/orders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(orderPayload)
+    });
 
+    if (!res.ok) throw new Error("Failed to save order");
+    
+    return await res.json(); 
+  };
+
+  // --- HELPER: EXTRACT THE CORRECT ADMIN ID ---
+  const extractOrderId = (response: any) => {
+      // PRIORITY 1: Look for 'orderId' (Readable Admin ID)
+      if (response.orderId) return response.orderId;
+      if (response.order && response.order.orderId) return response.order.orderId;
+      if (response.newOrder && response.newOrder.orderId) return response.newOrder.orderId;
+      if (response.data && response.data.orderId) return response.data.orderId;
+
+      // PRIORITY 2: Fallback to '_id'
+      if (response._id) return response._id;
+      if (response.id) return response.id;
+      if (response.order && response.order._id) return response.order._id;
+      
+      // PRIORITY 3: Emergency Fallback
+      return "PENDING-ID";
+  };
+
+  // --- 1. HANDLE COD ---
+  const processCODPayment = async () => {
     try {
-        const orderPayload = {
-            customer: formData,
-            items: cart.map(item => ({
-                productId: item._id,
-                title: item.title,
-                quantity: item.quantity,
-                price: item.price,
-                links: item.links,
-                image: item.image
-            })),
-            amount: finalTotal,
-            discountApplied: bundleDiscount,
-            paymentMethod: paymentMethod,
-        };
+        const savedOrder = await saveOrderToBackend('cod', 'Pending');
+        const finalOrderId = extractOrderId(savedOrder);
 
-        const res = await fetch('/api/orders', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(orderPayload)
-        });
+        // Clear Cart
+        localStorage.removeItem('daztao_cart');
 
-        const data = await res.json();
-
-        if (!res.ok) {
-            alert(data.error || "Order failed.");
-            setIsProcessing(false);
-            return;
-        }
-
-        // --- SUCCESS & REDIRECT ---
-        localStorage.removeItem('daztao_cart'); 
-        
+        // Redirect to Success Page (NOT WhatsApp directly)
+        // Pass details so the success page can build the WhatsApp link
         const params = new URLSearchParams({
-            orderId: data.orderId,
-            total: finalTotal.toString(),
-            method: paymentMethod,
+            orderId: finalOrderId,
+            amount: finalTotal.toString(),
             name: `${formData.firstName} ${formData.lastName}`,
-            phone: formData.phone
+            method: 'cod'
         });
 
         router.push(`/order-confirmed?${params.toString()}`);
 
     } catch (error) {
-        console.error(error);
-        alert("Network error. Please try again.");
+        console.error("COD Error", error);
+        alert("Something went wrong. Please check your connection.");
         setIsProcessing(false);
+    }
+  };
+
+  // --- 2. HANDLE RAZORPAY ---
+  const processRazorpayPayment = async () => {
+    const isLoaded = await loadRazorpayScript();
+    if (!isLoaded) {
+      alert('Razorpay SDK failed to load.');
+      setIsProcessing(false);
+      return;
+    }
+
+    try {
+      const res = await fetch('/api/razorpay/create-order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ amount: finalTotal }),
+      });
+      
+      const orderData = await res.json();
+      if (!res.ok) throw new Error(orderData.error);
+
+      const options = {
+        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID, 
+        amount: orderData.amount,
+        currency: orderData.currency,
+        name: "Daztao Store",
+        description: "Secure Payment",
+        order_id: orderData.id, 
+        prefill: {
+          name: `${formData.firstName} ${formData.lastName}`,
+          email: formData.email,
+          contact: formData.phone,
+        },
+        theme: { color: "#10b981" },
+        handler: async function (response: any) {
+          try {
+            const savedOrder = await saveOrderToBackend('upi', 'Paid', response);
+            const finalOrderId = extractOrderId(savedOrder);
+
+            localStorage.removeItem('daztao_cart');
+
+            // Redirect to Success Page
+            const params = new URLSearchParams({
+                orderId: finalOrderId,
+                amount: finalTotal.toString(),
+                name: `${formData.firstName} ${formData.lastName}`,
+                method: 'upi'
+            });
+
+            router.push(`/order-confirmed?${params.toString()}`);
+
+          } catch (saveError) {
+             console.error("Order Save Error", saveError);
+             // Emergency fallback if save fails but payment succeeds
+             const params = new URLSearchParams({
+                orderId: "PAID-VERIFY-PENDING",
+                amount: finalTotal.toString(),
+                name: `${formData.firstName} ${formData.lastName}`,
+                method: 'upi'
+            });
+            router.push(`/order-confirmed?${params.toString()}`);
+          }
+        },
+        modal: {
+            ondismiss: function() {
+                setIsProcessing(false);
+            }
+        }
+      };
+
+      const paymentObject = new (window as any).Razorpay(options);
+      paymentObject.open();
+
+    } catch (error) {
+      console.error("Razorpay Error", error);
+      alert("Payment initialization failed.");
+      setIsProcessing(false);
+    }
+  };
+
+  const handlePlaceOrder = async () => {
+    if (!validateForm()) return;
+    setIsProcessing(true);
+
+    if (paymentMethod === 'cod') {
+        await processCODPayment();
+    } else {
+        await processRazorpayPayment();
     }
   };
 
@@ -122,7 +238,6 @@ export default function CheckoutPage() {
   return (
     <div className="min-h-screen bg-[#080808] text-[#e0e0e0] font-sans selection:bg-rose-500/30 selection:text-white pb-32 relative">
       
-      {/* --- RETRO GRAIN OVERLAY --- */}
       <div className="fixed inset-0 pointer-events-none opacity-[0.04] z-[1] mix-blend-overlay" 
            style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")` }}>
       </div>
@@ -130,8 +245,6 @@ export default function CheckoutPage() {
       <Header />
 
       <section className="pt-40 px-6 max-w-7xl mx-auto relative z-10">
-        
-        {/* Step Indicator */}
         <div className="flex justify-center mb-12 text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-600 gap-4">
             <span>Cart</span>
             <span className="text-zinc-800">/</span>
@@ -147,7 +260,7 @@ export default function CheckoutPage() {
 
         <div className="flex flex-col lg:grid lg:grid-cols-12 gap-16 lg:gap-24">
 
-          {/* --- LEFT: FORM --- */}
+          {/* FORM */}
           <div className={`lg:col-span-7 space-y-12 transition-opacity duration-300 ${isProcessing ? 'opacity-50 pointer-events-none' : ''}`}>
             
             <div className="space-y-8">
@@ -162,7 +275,7 @@ export default function CheckoutPage() {
                 </div>
                 
                 <div className="grid grid-cols-2 gap-6">
-                  <InputGroup label="Phone Number" name="phone" type="tel" placeholder="+91 98765..." value={formData.phone} onChange={handleChange} error={errors.phone} />
+                  <InputGroup label="Phone Number" name="phone" type="tel" placeholder="+91 6005956542" value={formData.phone} onChange={handleChange} error={errors.phone} />
                   <InputGroup label="Email (Optional)" name="email" type="email" placeholder="rahul@gmail.com" value={formData.email} onChange={handleChange} />
                 </div>
 
@@ -190,24 +303,24 @@ export default function CheckoutPage() {
                   {paymentMethod === 'upi' && <div className="absolute top-4 right-4 w-2 h-2 bg-emerald-500 rounded-full shadow-[0_0_10px_currentColor]"/>}
                   <CreditCard className={`w-6 h-6 ${paymentMethod === 'upi' ? 'text-emerald-400' : 'text-zinc-600'}`} />
                   <div>
-                    <span className="text-sm font-bold block text-white mb-1">UPI / Online</span>
-                    <span className="text-[10px] text-emerald-400 uppercase tracking-widest font-bold">Free Shipping</span>
+                    <span className="text-sm font-bold block text-white mb-1">UPI / Cards</span>
+                    <span className="text-[10px] text-emerald-400 uppercase tracking-widest font-bold">Free, Fast & Secure</span>
                   </div>
                 </div>
 
-                <div onClick={() => setPaymentMethod('cod')} className={`cursor-pointer border p-6 rounded-sm flex flex-col gap-4 relative transition-all duration-300 ${paymentMethod === 'cod' ? 'bg-zinc-900/40 border-orange-500/50' : 'bg-transparent border-white/10 hover:border-white/20'}`}>
-                  {paymentMethod === 'cod' && <div className="absolute top-4 right-4 w-2 h-2 bg-orange-500 rounded-full shadow-[0_0_10px_currentColor]"/>}
-                  <Truck className={`w-6 h-6 ${paymentMethod === 'cod' ? 'text-orange-400' : 'text-zinc-600'}`} />
+                <div onClick={() => setPaymentMethod('cod')} className={`cursor-pointer border p-6 rounded-sm flex flex-col gap-4 relative transition-all duration-300 ${paymentMethod === 'cod' ? 'bg-zinc-900/40 border-green-500/50' : 'bg-transparent border-white/10 hover:border-white/20'}`}>
+                  {paymentMethod === 'cod' && <div className="absolute top-4 right-4 w-2 h-2 bg-green-500 rounded-full shadow-[0_0_10px_currentColor]"/>}
+                  <Truck className={`w-6 h-6 ${paymentMethod === 'cod' ? 'text-green-400' : 'text-zinc-600'}`} />
                   <div>
                     <span className="text-sm font-bold block text-white mb-1">Cash on Delivery</span>
-                    <span className="text-[10px] text-orange-400 uppercase tracking-widest font-bold">+ ₹100 Fee</span>
+                    <span className="text-[10px] text-green-400 uppercase tracking-widest font-bold">+100 shipping</span>
                   </div>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* --- RIGHT: SUMMARY --- */}
+          {/* SUMMARY */}
           <div className="lg:col-span-5">
             <div className="sticky top-32 bg-zinc-900/10 border border-white/5 p-8 rounded-sm backdrop-blur-sm">
               <h2 className="text-xl font-serif italic mb-8 text-white">Order Summary</h2>
@@ -233,7 +346,6 @@ export default function CheckoutPage() {
                   <span className="font-mono">₹{cartTotal}</span>
                 </div>
                 
-                {/* --- AUTO-APPLIED DISCOUNT ROW --- */}
                 {isDiscountEligible && (
                   <motion.div 
                     initial={{ opacity: 0, x: -10 }} 
@@ -246,7 +358,7 @@ export default function CheckoutPage() {
                 )}
 
                 <div className="flex justify-between text-zinc-400">
-                  <span>Shipping</span>
+                  <span>Shipping & Handling</span>
                   {paymentMethod === 'cod' ? (
                     <span className="text-orange-400 font-mono">+ ₹100</span>
                   ) : (
@@ -267,7 +379,6 @@ export default function CheckoutPage() {
                     ₹{finalTotal}
                   </motion.span>
                 </div>
-                <p className="text-right text-[10px] text-zinc-600 mt-2">Est. Delivery: 3-5 Business Days</p>
               </div>
 
               <button
@@ -280,7 +391,10 @@ export default function CheckoutPage() {
                 {isProcessing ? (
                   <><Loader2 className="w-4 h-4 animate-spin"/> Processing...</>
                 ) : (
-                  <>Confirm Order <ArrowRight className="w-4 h-4" /></>
+                  <>
+                      {paymentMethod === 'cod' ? 'Order on WhatsApp' : 'Pay Now'} 
+                      <ArrowRight className="w-4 h-4" />
+                  </>
                 )}
               </button>
 
@@ -296,7 +410,6 @@ export default function CheckoutPage() {
   );
 }
 
-// --- HELPER COMPONENT ---
 function InputGroup({ label, name, type = "text", placeholder, value, onChange, error, icon: Icon }: any) {
   return (
     <div>

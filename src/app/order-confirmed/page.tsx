@@ -3,8 +3,7 @@
 import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { Check, MessageCircle, Truck, Package, ShieldCheck, ExternalLink, ArrowRight } from 'lucide-react';
-import Header from '@/components/Header'; // Optional
+import { Check, MessageCircle, Truck, Package, ShieldCheck, ArrowRight } from 'lucide-react';
 
 function OrderConfirmedContent() {
   const searchParams = useSearchParams();
@@ -12,35 +11,30 @@ function OrderConfirmedContent() {
   
   // Retrieve Data
   const orderId = searchParams.get('orderId') || 'DAZ-####';
-  const total = searchParams.get('total') || '0';
+  const total = searchParams.get('amount') || '0';
   const rawMethod = searchParams.get('method') || 'upi';
-  const method = rawMethod === 'cod' ? 'Cash on Delivery' : 'Prepaid (UPI)';
+  
+  // Format Payment Method String
+  const methodDisplay = rawMethod === 'cod' ? 'COD' : 'UPI/ONLINE';
+  
   const userName = searchParams.get('name') || 'Customer';
-  const phone = searchParams.get('phone') || '';
 
-  // --- PROFESSIONAL WHATSAPP MESSAGE ---
-  // Clean, system-generated look. Easy to read.
+  // --- EXACT FORMAT YOU REQUESTED ---
   const message = 
-` *DAZTAO ORDER CONFIRMATION*
+`*DAZTAO ORDER CONFIRMATION*
 
-Order ID: #${orderId}
-Payment: ${method === 'Cash on Delivery' ? 'COD' : 'Prepaid (UPI)'}
-Amount: ₹${total}
-
-Name: ${userName}
-Phone: ${phone}
-
-Please confirm this order.`;
+*Name:* ${userName}
+*Order ID:* ${orderId}
+*Payment Method:* ${methodDisplay}`;
 
   const whatsappUrl = `https://wa.me/916005956542?text=${encodeURIComponent(message)}`;
 
-  // Auto-Redirect Logic (Improved)
+  // Auto-Redirect Logic
   useEffect(() => {
     if (countdown > 0) {
       const timer = setTimeout(() => setCountdown(c => c - 1), 1000);
       return () => clearTimeout(timer);
     } else {
-      // Small delay to ensure state update is processed before redirect
       const redirectTimer = setTimeout(() => {
         window.location.href = whatsappUrl;
       }, 500);
@@ -98,7 +92,7 @@ Please confirm this order.`;
             </div>
             <div>
               <span className="block text-[10px] text-zinc-600 uppercase tracking-widest font-bold mb-1">Payment</span>
-              <span className="text-zinc-300">{method}</span>
+              <span className="text-zinc-300">{methodDisplay}</span>
             </div>
             <div className="text-right">
               <span className="block text-[10px] text-zinc-600 uppercase tracking-widest font-bold mb-1">Status</span>
@@ -107,7 +101,7 @@ Please confirm this order.`;
           </div>
         </motion.div>
 
-        {/* 3. TIMELINE (WHAT HAPPENS NEXT) */}
+        {/* 3. TIMELINE */}
         <motion.div 
           initial={{ opacity: 0 }} 
           animate={{ opacity: 1 }} 
