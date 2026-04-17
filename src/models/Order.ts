@@ -42,7 +42,10 @@ const OrderSchema = new mongoose.Schema(
     razorpayOrderId: { type: String }, // Stores razorpay_order_id
     // ----------------------------
     
-    status: { type: String, default: 'Pending' }, 
+    status: { type: String, default: 'Pending' },
+
+    // Shipping tracking — set by admin when marking Shipped
+    trackingNumber: { type: String },
   },
   { timestamps: true }
 );

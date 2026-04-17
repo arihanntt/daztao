@@ -1,102 +1,149 @@
-import type { Metadata } from "next";
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
+import type { Metadata } from 'next';
+import Header from '@/components/Header';
+import Footer from '@/components/Footer';
+
+const BASE_URL = 'https://daztao.online';
 
 export const metadata: Metadata = {
-  title: "Shipping & Delivery Policy",
-  description: "Shipping timelines and delivery details for DAZTAO premium NFC products across India.",
+  title: 'Shipping & Delivery Policy — Daztao NFC Keychains India',
+  description:
+    'Daztao ships NFC keychains across all of India. Orders dispatched in 1–2 business days. Metro delivery in 3–5 days, rest of India in 5–7 days. Free shipping on all prepaid orders. COD available.',
+  keywords: ['Daztao shipping policy', 'NFC keychain delivery India', 'Daztao COD shipping', 'NFC keychain free shipping India', 'Daztao delivery time'],
+  alternates: { canonical: `${BASE_URL}/shipping-policy` },
+  openGraph: {
+    title: 'Shipping & Delivery Policy — Daztao',
+    description: 'Shipping timelines, COD charges, and delivery zones for Daztao NFC keychain orders in India.',
+    url: `${BASE_URL}/shipping-policy`,
+    siteName: 'Daztao',
+  },
+};
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'WebPage',
+  '@id': `${BASE_URL}/shipping-policy`,
+  name: 'Shipping and Delivery Policy — Daztao',
+  url: `${BASE_URL}/shipping-policy`,
+  description: 'Daztao shipping timelines and delivery policy for NFC keychain orders across India.',
+  inLanguage: 'en-IN',
+  breadcrumb: {
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: BASE_URL },
+      { '@type': 'ListItem', position: 2, name: 'Shipping Policy', item: `${BASE_URL}/shipping-policy` },
+    ],
+  },
+  publisher: { '@type': 'Organization', name: 'Daztao', url: BASE_URL },
 };
 
 export default function ShippingPolicy() {
   return (
-    <div className="min-h-screen bg-[#080808] text-[#e0e0e0] font-sans selection:bg-rose-500/30 selection:text-white relative overflow-x-hidden">
-      
-      {/* --- RETRO GRAIN OVERLAY --- */}
-      <div className="fixed inset-0 pointer-events-none opacity-[0.04] z-[1] mix-blend-overlay" 
-           style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")` }}>
+    <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <div className="min-h-screen bg-[#FAFAFA] text-[#1A1A1A] font-sans">
+        <Header />
+
+        <main className="max-w-3xl mx-auto px-6 md:px-8 pt-[68px] pb-24">
+
+          {/* Page Header */}
+          <div className="py-16 md:py-24 border-b border-gray-100">
+            <span className="block text-[10px] font-bold uppercase tracking-[0.28em] text-gray-400 mb-4">Store Policies</span>
+            <h1 className="text-[40px] md:text-[56px] font-black tracking-tight text-[#1A1A1A] leading-none">
+              Shipping &amp;<br />Delivery
+            </h1>
+            <p className="text-[12px] font-semibold uppercase tracking-[0.2em] text-gray-400 mt-5">Last Updated: January 2026</p>
+          </div>
+
+          {/* Content */}
+          <div className="py-12 space-y-12 text-[15px] leading-relaxed text-gray-600 font-light">
+
+            <section>
+              <h2 className="text-[18px] font-black text-[#1A1A1A] mb-4 tracking-tight">1. Order Processing &amp; Dispatch</h2>
+              <p>
+                All Daztao NFC keychain orders are carefully prepared and programmed before dispatch.
+                Orders are dispatched within <strong className="text-[#1A1A1A] font-semibold">1–2 business days</strong> of confirmation.
+                We operate Monday through Saturday, excluding national holidays.
+              </p>
+              <p className="mt-3">
+                Dispatch may take an additional day during periods of high order volume.
+              </p>
+            </section>
+
+            <section>
+              <h2 className="text-[18px] font-black text-[#1A1A1A] mb-4 tracking-tight">2. Delivery Timelines</h2>
+              <p className="mb-5">Estimated delivery after dispatch, via our logistics partners:</p>
+              <div className="border border-gray-200 divide-y divide-gray-100">
+                {[
+                  ['Metro Cities (Delhi, Mumbai, Bengaluru, Chennai, Hyderabad, Pune, Kolkata)', '3–5 business days'],
+                  ['Tier-2 & Tier-3 Cities', '5–7 business days'],
+                  ['Remote / Rural Areas', '7–10 business days'],
+                ].map(([zone, time]) => (
+                  <div key={zone} className="flex flex-col sm:flex-row sm:items-center sm:justify-between px-5 py-4 bg-white gap-1">
+                    <span className="text-[14px] text-gray-700">{zone}</span>
+                    <span className="text-[13px] font-black text-[#1A1A1A] uppercase tracking-wide shrink-0">{time}</span>
+                  </div>
+                ))}
+              </div>
+              <p className="mt-4 text-[13px] text-gray-400">
+                * Estimates only. Actual delivery may vary based on courier operations, weather, and regional constraints.
+              </p>
+            </section>
+
+            <section>
+              <h2 className="text-[18px] font-black text-[#1A1A1A] mb-4 tracking-tight">3. Shipping Charges</h2>
+              <div className="border border-gray-200 divide-y divide-gray-100">
+                {[
+                  ['Prepaid Orders (UPI / Card / Net Banking)', 'Free Shipping'],
+                  ['Cash on Delivery (COD)', 'Rs. 100 handling fee'],
+                ].map(([method, charge]) => (
+                  <div key={method} className="flex flex-col sm:flex-row sm:items-center sm:justify-between px-5 py-4 bg-white gap-1">
+                    <span className="text-[14px] text-gray-700">{method}</span>
+                    <span className={`text-[13px] font-black uppercase tracking-wide shrink-0 ${charge === 'Free Shipping' ? 'text-green-600' : 'text-[#1A1A1A]'}`}>{charge}</span>
+                  </div>
+                ))}
+              </div>
+            </section>
+
+            <section>
+              <h2 className="text-[18px] font-black text-[#1A1A1A] mb-4 tracking-tight">4. Order Tracking</h2>
+              <p>
+                Once your NFC keychain is shipped, a tracking number is updated in your{' '}
+                <a href="/account/orders" className="text-[#1A1A1A] font-semibold underline underline-offset-2 hover:opacity-60 transition">
+                  Order History
+                </a>{' '}
+                page and sent via WhatsApp or Email. Tracking details may take <strong className="text-[#1A1A1A] font-semibold">24–48 hours</strong> to activate on the courier's website.
+              </p>
+            </section>
+
+            <section className="border-l-4 border-gray-200 pl-5">
+              <h2 className="text-[16px] font-black text-[#1A1A1A] mb-3 tracking-tight">5. Courier Delays</h2>
+              <p className="text-[14px]">
+                Once your order is handed over to our courier partner, Daztao is not responsible for delays caused by the logistics service, weather events, or operational disruptions outside our control.
+              </p>
+            </section>
+
+            <section>
+              <h2 className="text-[18px] font-black text-[#1A1A1A] mb-4 tracking-tight">6. Address Accuracy</h2>
+              <p>
+                Please provide a complete shipping address — including house/flat number, area, landmark, city, state, and pincode.
+                Daztao is not liable for non-delivery or return-to-origin (RTO) caused by incorrect address details provided at checkout.
+              </p>
+            </section>
+
+            <section className="border-t border-gray-100 pt-10">
+              <p className="text-[13px] text-gray-400">
+                For shipping queries, contact us at{' '}
+                <a href="mailto:daztaoo@gmail.com" className="text-[#1A1A1A] font-semibold hover:opacity-60 transition">
+                  daztaoo@gmail.com
+                </a>{' '}
+                with your Order ID in the subject line.
+              </p>
+            </section>
+
+          </div>
+        </main>
+        <Footer />
       </div>
-
-      <Header />
-
-      <main className="max-w-4xl mx-auto px-6 pt-40 pb-32 relative z-10">
-        
-        {/* Header Block */}
-        <div className="mb-20 border-b border-white/5 pb-12">
-          <span className="block text-[10px] font-bold tracking-[0.3em] text-zinc-500 mb-6 uppercase">
-            Logistics
-          </span>
-          <h1 className="text-4xl md:text-6xl font-serif italic text-white mb-6 leading-tight">
-            Shipping & Delivery
-          </h1>
-          <p className="text-zinc-500 text-xs font-mono uppercase tracking-widest">
-            Last Updated: January 2026
-          </p>
-        </div>
-
-        {/* Content Blocks */}
-        <div className="space-y-16 text-sm leading-8 text-zinc-400 font-light">
-          
-          <section>
-            <h2 className="text-2xl font-serif text-white mb-6">1. Order Processing & Dispatch</h2>
-            <p>
-              DAZTAO products are prepared and packed carefully to ensure quality and accuracy. 
-              Orders are typically processed and dispatched within <strong>2–3 business days</strong> after order confirmation.
-            </p>
-            <p className="mt-4">
-              Dispatch timelines may vary slightly during high order volumes, weekends, or public holidays. 
-              We operate Monday through Saturday.
-            </p>
-          </section>
-
-          <section>
-            <h2 className="text-2xl font-serif text-white mb-6">2. Delivery Timelines</h2>
-            <p className="mb-4">
-              We ship orders across India using reliable economy courier partners to keep shipping free or low-cost. 
-              Estimated delivery timelines after dispatch are as follows:
-            </p>
-            <div className="bg-zinc-900/30 border border-white/5 p-6 rounded-sm">
-              <ul className="space-y-4 text-zinc-300">
-                <li className="flex justify-between border-b border-white/5 pb-2">
-                  <span>Metro Cities</span>
-                  <span className="font-mono text-white">5–7 business days</span>
-                </li>
-                <li className="flex justify-between pt-2">
-                  <span>Rest of India</span>
-                  <span className="font-mono text-white">7–9 business days</span>
-                </li>
-              </ul>
-            </div>
-            <p className="mt-6 text-xs text-zinc-500">
-              *Delivery times are estimates and may vary due to courier delays, weather conditions, or regional service limitations.
-            </p>
-          </section>
-
-          <section>
-            <h2 className="text-2xl font-serif text-white mb-6">3. Order Tracking</h2>
-            <p>
-              Once your order is shipped, you will receive a tracking link via WhatsApp or Email. 
-              Please note that tracking details may take up to <strong>24–48 hours</strong> to become active on the courier partner’s website after you receive the link.
-            </p>
-          </section>
-
-          <section className="bg-rose-900/5 border-l-2 border-rose-900/50 p-6">
-            <h2 className="text-lg font-serif text-white mb-3">4. Delays & Courier Responsibility</h2>
-            <p className="text-zinc-300 text-xs leading-relaxed">
-              While we work closely with our courier partners to ensure timely delivery, DAZTAO is not responsible for delays caused by the courier service after dispatch. Once handed over to the logistics partner, delivery timelines are subject to their operational processes and external factors.
-            </p>
-          </section>
-
-          <section>
-            <h2 className="text-2xl font-serif text-white mb-6">5. Address Accuracy</h2>
-            <p>
-              Customers are responsible for providing complete and accurate shipping information (including House No, Landmark, and Pincode). DAZTAO will not be responsible for delays, non-delivery, or return-to-origin (RTO) caused by incorrect or incomplete address details provided at checkout.
-            </p>
-          </section>
-
-        </div>
-      </main>
-
-      <Footer />
-    </div>
+    </>
   );
 }

@@ -9,12 +9,15 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@types/bcryptjs": "^2.4.6",
     "@vercel/analytics": "^1.6.1",
+    "bcryptjs": "^3.0.3",
     "framer-motion": "^12.26.2",
     "lodash.debounce": "^4.0.8",
     "lucide-react": "^0.562.0",
     "mongoose": "^9.1.4",
     "next": "16.1.2",
+    "next-auth": "^4.24.14",
     "nprogress": "^0.2.0",
     "qrcode.react": "^4.2.0",
     "razorpay": "^2.9.6",

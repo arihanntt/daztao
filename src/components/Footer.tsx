@@ -1,107 +1,76 @@
 'use client';
 
 import Link from 'next/link';
-import { ArrowUpRight } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { ArrowRight } from 'lucide-react';
 
+// ─────────────────────────────────────────────────────────────────────────────
+// The editorial DAZTAO footer — matches the homepage Section 10 exactly
+// ─────────────────────────────────────────────────────────────────────────────
 export default function Footer() {
-  const links = [
-    { label: 'Home', href: '/' },
-    { label: 'Catalog', href: '/products' },
-    { label: 'About', href: '/about' },
-    { label: 'Contact', href: '/contact' },
-  ];
-
-  const legal = [
-    { label: 'Shipping Policy', href: '/shipping-policy' },
-    { label: 'Refund Policy', href: '/refund-policy' },
-    { label: 'Privacy Policy', href: '/privacy-policy' },
-    { label: 'Terms of Service', href: '/terms' },
-  ];
+  const router = useRouter();
 
   return (
-    <footer className="relative bg-[#080808] text-[#e0e0e0] border-t border-white/5 font-sans selection:bg-rose-500/30 selection:text-white">
-      
-      {/* Retro Grain Overlay (Consistent with rest of site) */}
-      <div className="absolute inset-0 pointer-events-none opacity-[0.04] z-[1] mix-blend-overlay" 
-           style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")` }}>
+    <footer aria-label="Daztao site footer" className="bg-[#1A1A1A] text-white">
+
+      {/* Top — editorial logotype + CTA */}
+      <div className="px-6 md:px-12 lg:px-20 pt-20 md:pt-28 pb-16 md:pb-20 border-b border-white/10">
+        <div className="max-w-[1200px] mx-auto">
+          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-10">
+
+            {/* Massive logotype */}
+            <h2 className="text-[80px] md:text-[120px] lg:text-[160px] font-black tracking-tight leading-none text-white select-none">
+              DAZTAO
+            </h2>
+
+            {/* CTA block */}
+            <div className="flex flex-col items-start md:items-end gap-4 pb-2">
+              <p className="text-[15px] text-white/55 max-w-xs leading-relaxed font-light md:text-right">
+                Ready to upgrade your networking? Get your NFC smart keychain today.
+              </p>
+              <button
+                onClick={() => router.push('/products')}
+                className="flex items-center gap-3 px-8 py-4 border border-white/30 text-white text-[13px] font-black uppercase tracking-wide hover:bg-white hover:text-[#1A1A1A] transition-all"
+                aria-label="Get your Daztao NFC keychain"
+              >
+                Get Your Keychain <ArrowRight className="w-4 h-4" aria-hidden="true" />
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-6 py-20 relative z-10">
+      {/* Bottom — links row */}
+      <div className="px-6 md:px-12 lg:px-20 py-8">
+        <div className="max-w-[1200px] mx-auto flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
 
-        <div className="flex flex-col lg:flex-row justify-between gap-16 lg:gap-24 mb-20">
+          {/* Nav + policy links */}
+          <nav aria-label="Footer navigation" className="flex flex-wrap gap-x-6 gap-y-2">
+            {[
+              { label: 'Catalog',         href: '/products'        },
+              { label: 'About',           href: '/about'           },
+              { label: 'FAQ',             href: '/faq'             },
+              { label: 'Contact',         href: '/contact'         },
+              { label: 'Privacy Policy',  href: '/privacy-policy'  },
+              { label: 'Terms',           href: '/terms'           },
+              { label: 'Refund Policy',   href: '/refund-policy'   },
+              { label: 'Shipping',        href: '/shipping-policy' },
+            ].map(({ label, href }) => (
+              <Link
+                key={href}
+                href={href}
+                className="text-[12px] text-white/40 hover:text-white transition-colors"
+              >
+                {label}
+              </Link>
+            ))}
+          </nav>
 
-          {/* --- BRAND & SEO COPY --- */}
-          <div className="lg:w-1/3 space-y-8">
-            <div>
-              <h2 className="text-2xl font-serif italic text-white tracking-tight mb-4">DAZTAO</h2>
-              <p className="text-sm text-zinc-500 leading-7 font-light max-w-sm">
-                DAZTAO builds premium NFC keychains that let you instantly share Instagram, Spotify, and digital profiles with one tap. 
-                Designed in India for fast, physical connection.
-              </p>
-            </div>
-
-            {/* Trust Strip */}
-            <div className="flex flex-wrap gap-x-6 gap-y-2 text-[10px] uppercase tracking-[0.15em] text-zinc-600 font-bold">
-              <span>No App Required</span>
-              <span>No Battery</span>
-              <span>iPhone & Android</span>
-            </div>
-
-            <p className="text-[10px] text-zinc-700 tracking-wide pt-4 border-t border-white/5 inline-block">
-              Ships across India • WhatsApp Support Available
-            </p>
-          </div>
-
-          {/* --- LINKS GRID --- */}
-          <div className="flex-1 grid grid-cols-2 gap-12 lg:gap-24">
-            
-            {/* Menu */}
-            <div>
-              <h4 className="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.2em] mb-8">Menu</h4>
-              <ul className="space-y-4">
-                {links.map((link) => (
-                  <li key={link.href}>
-                    <Link href={link.href} className="text-sm text-zinc-400 hover:text-white transition-colors duration-300 flex items-center gap-1 group">
-                      {link.label}
-                      <ArrowUpRight className="w-3 h-3 opacity-0 -translate-y-1 translate-x-1 group-hover:opacity-100 group-hover:translate-y-0 group-hover:translate-x-0 transition-all duration-300" />
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* Legal */}
-            <div>
-              <h4 className="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.2em] mb-8">Legal</h4>
-              <ul className="space-y-4">
-                {legal.map((link) => (
-                  <li key={link.href}>
-                    <Link href={link.href} className="text-sm text-zinc-400 hover:text-white transition-colors duration-300">
-                      {link.label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-          </div>
+          {/* Legal */}
+          <p className="text-[11px] text-white/25 shrink-0">
+            &copy; {new Date().getFullYear()} Daztao. All rights reserved.
+          </p>
         </div>
-
-        {/* --- BOTTOM BAR & SOFT CTA --- */}
-        <div className="pt-12 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-6 text-[10px] text-zinc-600 uppercase tracking-[0.15em]">
-          
-          {/* Copyright */}
-          <span>© {new Date().getFullYear()} DAZTAO India.</span>
-
-          {/* Soft CTA for Scrollers */}
-          <Link href="/products" className="hidden md:block text-zinc-500 hover:text-white transition-colors border-b border-transparent hover:border-zinc-500 pb-0.5">
-            Explore Collection →
-          </Link>
-
-          {/* Credits */}
-          <span>A Drixe Group Company</span>
-        </div>
-
       </div>
     </footer>
   );

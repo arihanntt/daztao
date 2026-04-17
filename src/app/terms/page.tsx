@@ -2,23 +2,42 @@ import type { Metadata } from "next";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
+const BASE_URL = 'https://daztao.online';
+
 export const metadata: Metadata = {
-  title: "Terms of Service | DAZTAO Legal",
-  description: "Terms and conditions for using DAZTAO services and products. Please read carefully before ordering.",
+  title: 'Terms of Service — Daztao NFC Keychains India',
+  description:
+    'Read the Daztao terms of service. By purchasing an NFC keychain from Daztao, you agree to these terms governing product usage, customization, liability, and governing law.',
+  keywords: ['Daztao terms of service', 'NFC keychain store terms India', 'Daztao legal agreement'],
+  alternates: { canonical: `${BASE_URL}/terms` },
+  robots: { index: true, follow: true },
+};
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'WebPage',
+  '@id': `${BASE_URL}/terms`,
+  name: 'Terms of Service — Daztao',
+  url: `${BASE_URL}/terms`,
+  description: 'Terms and conditions for purchasing and using Daztao NFC keychain products.',
+  inLanguage: 'en-IN',
+  publisher: { '@type': 'Organization', name: 'Daztao', url: BASE_URL },
 };
 
 export default function TermsOfService() {
   return (
-    <div className="min-h-screen bg-[#080808] text-[#e0e0e0] font-sans selection:bg-rose-500/30 selection:text-white relative overflow-x-hidden">
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+    <div className="min-h-screen bg-[#FAFAFA] text-[#1A1A1A] font-sans">
       
-      {/* --- RETRO GRAIN OVERLAY --- */}
-      <div className="fixed inset-0 pointer-events-none opacity-[0.04] z-[1] mix-blend-overlay" 
-           style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")` }}>
-      </div>
+
 
       <Header />
 
-      <main className="max-w-4xl mx-auto px-6 pt-40 pb-32 relative z-10">
+      <main className="max-w-3xl mx-auto px-4 md:px-6 pt-[120px] pb-24">
         
         {/* Header Block */}
         <div className="mb-20 border-b border-white/5 pb-12">
@@ -34,7 +53,7 @@ export default function TermsOfService() {
         </div>
 
         {/* Content Blocks */}
-        <div className="space-y-16 text-sm leading-8 text-zinc-400 font-light">
+        <div className="space-y-12 text-[14px] leading-7 text-gray-500">
           
           <section>
             <h2 className="text-2xl font-serif text-white mb-6">1. Acceptance of Terms</h2>
@@ -106,8 +125,8 @@ export default function TermsOfService() {
 
         </div>
       </main>
-
       <Footer />
     </div>
+    </>
   );
 }

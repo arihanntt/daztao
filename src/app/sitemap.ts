@@ -2,59 +2,79 @@ import { MetadataRoute } from 'next';
 import { connectDB } from '@/lib/mongodb';
 import Product from '@/models/Product';
 
+const BASE_URL = 'https://daztao.online';
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = 'https://daztao.online';
 
-  // 1. Fetch Dynamic Products
-  // Optimization: We only select '_id', 'slug', and 'updatedAt' to speed up the query
+  // Fetch live product slugs from the database
   await connectDB();
-  const products = await Product.find({}).select('slug updatedAt');
+  const products = await Product.find({}, { slug: 1, updatedAt: 1 }).lean();
 
-  // 2. Generate Product URLs (The "Money" Pages)
-  const productUrls: MetadataRoute.Sitemap = products.map((product) => ({
-    url: `${baseUrl}/buy/${product.slug}`,
-    // If your DB has updatedAt, use it. Otherwise, use current date.
+  // Product pages — highest commercial intent
+  const productUrls: MetadataRoute.Sitemap = products.map((product: any) => ({
+    url: `${BASE_URL}/buy/${product.slug}`,
     lastModified: product.updatedAt ? new Date(product.updatedAt) : new Date(),
-    changeFrequency: 'weekly', // Products don't change every day
-    priority: 0.8, // High priority, but lower than the main collection
+    changeFrequency: 'weekly',
+    priority: 0.9,
   }));
 
-  // 3. Define Static Routes (The "Core" Pages)
+  // Core static routes
   const staticRoutes: MetadataRoute.Sitemap = [
     {
-      url: baseUrl, // Home
+      url: BASE_URL,
       lastModified: new Date(),
       changeFrequency: 'daily',
-      priority: 1.0, // Highest priority
+      priority: 1.0,
     },
     {
-      url: `${baseUrl}/products`, // Main Collection
+      url: `${BASE_URL}/products`,
       lastModified: new Date(),
-      changeFrequency: 'daily', // Changes whenever you add a product
-      priority: 0.9, // Very high priority (Hub page)
+      changeFrequency: 'daily',
+      priority: 0.95,
     },
     {
-      url: `${baseUrl}/about`, // Brand Story
+      url: `${BASE_URL}/faq`,
       lastModified: new Date(),
       changeFrequency: 'monthly',
-      priority: 0.7, // Medium priority
+      priority: 0.85,
     },
     {
-      url: `${baseUrl}/contact`, // Trust Page
+      url: `${BASE_URL}/about`,
       lastModified: new Date(),
-      changeFrequency: 'yearly',
-      priority: 0.6, // Lower priority (Content rarely changes)
+      changeFrequency: 'monthly',
+      priority: 0.7,
     },
-    
     {
-      url: `${baseUrl}/shipping-policy`,
+      url: `${BASE_URL}/contact`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly',
+      priority: 0.65,
+    },
+    {
+      url: `${BASE_URL}/shipping-policy`,
       lastModified: new Date(),
       changeFrequency: 'yearly',
-      priority: 0.5,
+      priority: 0.4,
     },
-    
+    {
+      url: `${BASE_URL}/refund-policy`,
+      lastModified: new Date(),
+      changeFrequency: 'yearly',
+      priority: 0.4,
+    },
+    {
+      url: `${BASE_URL}/privacy-policy`,
+      lastModified: new Date(),
+      changeFrequency: 'yearly',
+      priority: 0.3,
+    },
+    {
+      url: `${BASE_URL}/terms`,
+      lastModified: new Date(),
+      changeFrequency: 'yearly',
+      priority: 0.3,
+    },
   ];
 
-  // 4. Merge and Return
   return [...staticRoutes, ...productUrls];
 }

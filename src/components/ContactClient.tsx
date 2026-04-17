@@ -1,14 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import {
-  Mail,
-  MessageSquare,
-  ShieldCheck,
-  Zap,
-  MapPin,
-  ArrowRight
-} from 'lucide-react';
+import { Mail, MessageSquare, ShieldCheck, Zap, MapPin, ArrowRight } from 'lucide-react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { useRouter } from 'next/navigation';
@@ -17,158 +10,120 @@ export default function ContactClient() {
   const router = useRouter();
 
   return (
-    <div className="relative min-h-screen bg-[#080808] text-[#e0e0e0] font-sans selection:bg-rose-500/30 selection:text-white overflow-x-hidden">
-      
-      {/* --- RETRO GRAIN OVERLAY --- */}
-      <div className="fixed inset-0 pointer-events-none opacity-[0.04] z-[1] mix-blend-overlay" 
-           style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")` }}>
-      </div>
-
+    <div className="min-h-screen bg-[#FAFAFA] text-[#1A1A1A] font-sans overflow-x-hidden">
       <Header />
 
-      {/* ================= HERO ================= */}
-      <section className="relative pt-40 pb-20 px-6 z-10">
-        <div className="max-w-5xl mx-auto">
+      {/* ── Hero ─────────────────────────────────────────────────────── */}
+      <section className="pt-[68px] border-b border-gray-100">
+        <div className="max-w-[1200px] mx-auto px-6 md:px-12 lg:px-20 py-24 md:py-32">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
+            transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
           >
-            <span className="block text-[10px] font-bold tracking-[0.3em] text-zinc-500 mb-8 uppercase">
+            <span className="block text-[10px] font-bold uppercase tracking-[0.28em] text-gray-400 mb-6">
               Contact
             </span>
-
-            <h1 className="text-5xl md:text-8xl font-serif italic font-light leading-[0.9] tracking-tight text-white mb-10">
+            <h1 className="text-[48px] md:text-[80px] lg:text-[96px] font-black leading-[0.95] tracking-tight text-[#1A1A1A] mb-8">
               Let's talk.
             </h1>
-
-            <p className="text-xl md:text-2xl text-zinc-300 font-light leading-relaxed max-w-2xl">
-              Whether you need support, have a question, or want to work with us — reach out directly.
+            <p className="text-[17px] md:text-[20px] text-gray-500 font-light leading-relaxed max-w-xl">
+              Whether you need support, have a question about your order, or want to work with us —
+              reach out directly and a real person will respond.
             </p>
           </motion.div>
         </div>
       </section>
 
-      {/* ================= CONTACT CHANNELS ================= */}
-      <section className="relative py-24 px-6 border-t border-white/5 z-10 bg-zinc-900/10">
-        <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-20">
+      {/* ── Contact Channels ─────────────────────────────────────────── */}
+      <section className="border-b border-gray-100">
+        <div className="max-w-[1200px] mx-auto px-6 md:px-12 lg:px-20 py-24 md:py-32">
+          <div className="flex flex-col md:flex-row gap-16 md:gap-24 items-start">
 
-          {/* LEFT: DIRECT CHANNELS */}
-          <div>
-            <h2 className="text-3xl md:text-4xl font-serif italic text-white mb-8">
-              Human responses. <br/> No noise.
-            </h2>
-
-            <p className="text-zinc-400 leading-relaxed max-w-md mb-12 font-light">
-              We don’t hide behind ticket numbers. Every message is read by a real person.
-            </p>
-
-            <div className="space-y-10">
-              <ContactItem
-                icon={Mail}
-                title="Support"
-                value="daztaoo@gmail.com"
-                href="mailto:daztaoo@gmail.com"
-              />
-              <ContactItem
-                icon={MessageSquare}
-                title="Business"
-                value="daztaoo@gmail.com"
-                href="mailto:daztaoo@gmail.com"
-              />
-              <ContactItem
-                icon={ShieldCheck}
-                title="Privacy"
-                value="daztaoo@gmail.com"
-                href="mailto:daztaoo@gmail.com"
-              />
-            </div>
-
-            <p className="text-[10px] text-zinc-600 mt-12 max-w-sm leading-relaxed uppercase tracking-wide">
-              Please avoid sending marketing or partnership pitches unless relevant. 
-              We currently support customers across India.
-            </p>
-          </div>
-
-          {/* RIGHT: INFO BOX */}
-          <div className="space-y-8 p-10 border border-white/5 bg-[#0a0a0a] rounded-sm h-fit">
-            <InfoItem
-              icon={Zap}
-              title="Response Time"
-              desc="Usually within 24–48 hours."
-            />
-            <InfoItem
-              icon={MapPin}
-              title="Operations"
-              desc="Remote-first, with fulfillment partners across India."
-            />
-            
-            <div className="pt-8 border-t border-white/5">
-              <p className="text-xs text-zinc-500 leading-relaxed mb-6">
-                For order-related queries, please include your <strong>Order ID</strong> in the subject line. This helps us resolve things faster.
+            {/* Left — channels */}
+            <div className="md:w-1/2">
+              <span className="block text-[10px] font-bold uppercase tracking-[0.28em] text-gray-400 mb-8">
+                Reach Us
+              </span>
+              <h2 className="text-[28px] md:text-[36px] font-black tracking-tight text-[#1A1A1A] leading-tight mb-6">
+                Human responses.<br />No noise.
+              </h2>
+              <p className="text-[15px] text-gray-500 font-light leading-relaxed mb-12 max-w-sm">
+                We don't hide behind ticket numbers. Every message is read by a real person
+                and replied to within 24 to 48 hours.
               </p>
-              
-              {/* Back to Shop CTA */}
-              <button
-                onClick={() => router.push('/products')}
-                className="text-xs font-bold uppercase tracking-[0.2em] text-white hover:text-rose-400 transition flex items-center gap-2"
-              >
-                Back to Catalog <ArrowRight className="w-3 h-3" />
-              </button>
+
+              <div className="flex flex-col gap-8">
+                {[
+                  { Icon: Mail,          label: 'Support',  value: 'daztaoo@gmail.com',  href: 'mailto:daztaoo@gmail.com' },
+                  { Icon: MessageSquare, label: 'Business', value: 'daztaoo@gmail.com',  href: 'mailto:daztaoo@gmail.com' },
+                  { Icon: ShieldCheck,   label: 'Privacy',  value: 'daztaoo@gmail.com',  href: 'mailto:daztaoo@gmail.com' },
+                ].map(({ Icon, label, value, href }) => (
+                  <div key={label} className="flex items-start gap-5 group">
+                    <div className="w-10 h-10 border border-gray-200 flex items-center justify-center text-gray-400 group-hover:border-[#1A1A1A] group-hover:text-[#1A1A1A] transition-all shrink-0">
+                      <Icon className="w-4 h-4" aria-hidden="true" />
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-gray-400 mb-1">{label}</p>
+                      <a
+                        href={href}
+                        className="text-[16px] font-semibold text-[#1A1A1A] hover:text-gray-500 transition-colors border-b border-gray-200 pb-0.5"
+                      >
+                        {value}
+                      </a>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <p className="text-[11px] text-gray-400 mt-10 max-w-sm leading-relaxed font-light">
+                For order queries, please include your Order ID in the subject line.
+                We currently serve customers across all of India.
+              </p>
             </div>
+
+            {/* Right — info box */}
+            <div className="md:w-1/2">
+              <div className="border border-gray-200 bg-white p-8 md:p-10 flex flex-col gap-8">
+                <div className="flex items-start gap-5">
+                  <div className="w-8 h-8 border border-gray-200 flex items-center justify-center text-gray-400 shrink-0">
+                    <Zap className="w-3.5 h-3.5" aria-hidden="true" />
+                  </div>
+                  <div>
+                    <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-gray-400 mb-1.5">Response Time</p>
+                    <p className="text-[14px] text-[#1A1A1A] font-semibold">Usually within 24–48 hours.</p>
+                    <p className="text-[13px] text-gray-500 font-light mt-1">Faster for order-related queries with an Order ID.</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-5">
+                  <div className="w-8 h-8 border border-gray-200 flex items-center justify-center text-gray-400 shrink-0">
+                    <MapPin className="w-3.5 h-3.5" aria-hidden="true" />
+                  </div>
+                  <div>
+                    <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-gray-400 mb-1.5">Operations</p>
+                    <p className="text-[14px] text-[#1A1A1A] font-semibold">Remote-first, ships pan-India.</p>
+                    <p className="text-[13px] text-gray-500 font-light mt-1">Fulfillment partners across major cities. Delivery in 5–7 days.</p>
+                  </div>
+                </div>
+
+                <div className="pt-6 border-t border-gray-100">
+                  <button
+                    onClick={() => router.push('/products')}
+                    className="flex items-center gap-2 text-[13px] font-bold uppercase tracking-wide text-[#1A1A1A] hover:opacity-60 transition-opacity"
+                    aria-label="Browse Daztao NFC keychain catalog"
+                  >
+                    Back to Catalog <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" />
+                  </button>
+                </div>
+              </div>
+            </div>
+
           </div>
-
         </div>
-      </section>
-
-      {/* ================= SEO MICRO-COPY (Hidden but valuable) ================= */}
-      <section className="py-12 px-6 bg-[#080808]">
-        <p className="text-[10px] text-zinc-700 max-w-3xl mx-auto text-center leading-relaxed">
-          Contact DAZTAO for support related to NFC keychains, order status, shipping, refunds, 
-          or general questions. We respond to all customer inquiries via email to ensure quality service.
-        </p>
       </section>
 
       <Footer />
-    </div>
-  );
-}
-
-/* ---------- HELPERS ---------- */
-
-function ContactItem({ icon: Icon, title, value, href }: any) {
-  return (
-    <div className="flex gap-6 group">
-      <div className="w-10 h-10 border border-zinc-800 rounded-full flex items-center justify-center text-zinc-500 group-hover:text-white group-hover:border-white transition-all duration-300">
-        <Icon className="w-4 h-4" />
-      </div>
-      <div>
-        <div className="text-[10px] font-bold tracking-[0.2em] text-zinc-500 mb-1 uppercase group-hover:text-rose-400 transition-colors">
-          {title}
-        </div>
-        <a 
-          href={href} 
-          className="text-lg text-zinc-300 hover:text-white transition border-b border-transparent hover:border-white pb-0.5"
-        >
-          {value}
-        </a>
-      </div>
-    </div>
-  );
-}
-
-function InfoItem({ icon: Icon, title, desc }: any) {
-  return (
-    <div className="flex gap-4">
-      <Icon className="w-5 h-5 text-zinc-600 mt-1" />
-      <div>
-        <div className="text-sm font-serif italic text-white mb-1">
-          {title}
-        </div>
-        <div className="text-sm text-zinc-400 font-light leading-relaxed">
-          {desc}
-        </div>
-      </div>
     </div>
   );
 }
